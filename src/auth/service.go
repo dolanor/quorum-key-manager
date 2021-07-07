@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/quorum-key-manager/pkg/app"
 	"github.com/consensys/quorum-key-manager/src/auth/authenticator"
+	"github.com/consensys/quorum-key-manager/src/auth/authenticator/oicd"
 	authmanager "github.com/consensys/quorum-key-manager/src/auth/manager"
 	manifestsmanager "github.com/consensys/quorum-key-manager/src/manifests/manager"
 )
@@ -44,11 +45,19 @@ func Middleware(a *app.App, logger log.Logger) (func(http.Handler) http.Handler,
 		return nil, err
 	}
 
+	auths := []authenticator.Authenticator{}
+	oicdAuth, err := oicd.NewAuthenticator(oicd.NewDefaultConfig())
+	if err != nil {
+		return nil, err
+	} else if oicdAuth != nil {
+		auths = append(auths, oicdAuth)
+	}
+
 	// Create middleware
 	mid := authenticator.NewMiddleware(
 		*policyMngr,
 		logger,
-		// TODO: pass each authenticator implementation based on config
+		auths...,
 	)
 
 	return mid.Then, nil

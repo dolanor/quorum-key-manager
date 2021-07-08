@@ -10,8 +10,6 @@ import (
 	"github.com/consensys/quorum-key-manager/src/auth/types"
 )
 
-var authenticatedGroup = "system:authenticated"
-
 // Middleware synchronize authentication
 type Middleware struct {
 	authenticator Authenticator
@@ -45,7 +43,7 @@ func (mid *Middleware) ServeHTTP(rw http.ResponseWriter, req *http.Request, next
 
 	if info != nil {
 		// If authentication succeeded then sets the system:authenticated group
-		info.Groups = append(info.Groups, authenticatedGroup)
+		info.Groups = append(types.AuthenticatedUser.Groups, info.Groups...)
 	} else {
 		// If no authentication then sets info to anonymous user
 		info = types.AnonymousUser

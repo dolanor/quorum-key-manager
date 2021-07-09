@@ -37,7 +37,7 @@ func (mid *Middleware) ServeHTTP(rw http.ResponseWriter, req *http.Request, next
 	// Authenticate request
 	info, err := mid.authenticator.Authenticate(req)
 	if err != nil {
-		OnError(rw, req, err)
+		mid.onError(rw, req, err)
 		return
 	}
 
@@ -82,6 +82,8 @@ func (mid *Middleware) getUserPolicies(ctx context.Context, info *types.UserInfo
 	return policies
 }
 
-func OnError(w http.ResponseWriter, _ *http.Request, err error) {
-	http.Error(w, err.Error(), http.StatusUnauthorized)
+func (mid *Middleware) onError(w http.ResponseWriter, _ *http.Request, err error) {
+	errMsg := "unauthorized request"
+	mid.logger.Error(errMsg, "err", err.Error())
+	http.Error(w, errMsg, http.StatusUnauthorized)
 }
